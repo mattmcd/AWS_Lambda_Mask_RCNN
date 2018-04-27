@@ -1,0 +1,18 @@
+FROM amazonlinux:latest
+
+MAINTAINER Matt McDonnell "matt@matt-mcdonnell.com"
+
+RUN yum -y -q update
+
+RUN yum -y -q install python27-pip zip
+
+RUN pip install -q virtualenv
+
+RUN virtualenv tf_env
+
+RUN source tf_env/bin/activate && \
+  pip install -q --upgrade numpy pandas requests
+
+RUN cd tf_env/lib/python2.7/site-packages/ && zip -qr ~/tf_env.zip . --exclude \*.DS_Store \*.pyc /external/\* 
+
+CMD cp ~/tf_env.zip /app/
