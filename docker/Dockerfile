@@ -13,7 +13,7 @@ RUN pip3 install -q virtualenv
 RUN virtualenv -p python3 tf_env
 
 RUN source tf_env/bin/activate && \
-  pip3 install -q --upgrade numpy scikit-image tensorflow keras
+  pip3 install -q --upgrade numpy scikit-image matplotlib tensorflow keras
 
 RUN cd tf_env/lib/python3.6/site-packages/ && zip -qr ~/tf_env.zip . --exclude \*.DS_Store \*.pyc /external/\* /tensorflow/contrib/\* /tensorflow/include/unsupported/\*
 
