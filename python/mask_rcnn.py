@@ -14,6 +14,9 @@ MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 # Local path to trained weights file
 COCO_MODEL_PATH = os.path.join(ROOT_DIR, 'data', 'model', "mask_rcnn_coco.h5")
 
+IMAGE_DIR = os.path.join(ROOT_DIR, 'data', 'images')
+
+HERE = os.path.dirname(os.path.realpath(__file__))
 
 class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'bus', 'train', 'truck', 'boat', 'traffic light',
@@ -39,22 +42,55 @@ class InferenceConfig(coco.CocoConfig):
     IMAGES_PER_GPU = 1
 
 
-def init():
+def init(model_dir=MODEL_DIR, model_path=COCO_MODEL_PATH):
     config = InferenceConfig()
 
-    # Create model object in inference mode.# Creat
-    model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
+    # Create model object in inference mode.
+    model = modellib.MaskRCNN(mode="inference", model_dir=model_dir, config=config)
 
     # Load weights trained on MS-COCO
-    model.load_weights(COCO_MODEL_PATH, by_name=True)
+    model.load_weights(model_path, by_name=True)
     return model
 
 
-def demo(image='cows_800x600.jpg'):
+# def get_demo_image(name='cows_800x600.jpg'):
+#     # https://stackoverflow.com/questions/33648322/tensorflow-image-reading-display
+#     filename_queue = tf.train.string_input_producer([os.path.join(IMAGE_DIR, name)])
+#
+#     reader = tf.WholeFileReader()
+#     key, value = reader.read(filename_queue)
+#
+#     my_img = tf.image.decode_png(value)  # use png or jpg decoder based on your files.
+#
+#     init_op = tf.global_variables_initializer()
+#     image = None
+#     with tf.Session() as sess:
+#         sess.run(init_op)
+#
+#         # Start populating the filename queue.
+#
+#         coord = tf.train.Coordinator()
+#         threads = tf.train.start_queue_runners(coord=coord)
+#
+#         for i in range(1):  # length of your filename list
+#             image = my_img.eval()  # here is your image Tensor :)
+#
+#         # print(image.shape)
+#         # Image.fromarray(np.asarray(image)).show()
+#
+#         coord.request_stop()
+#         coord.join(threads)
+#     return image
+
+
+def demo(name='cows_800x600.jpg', model=None, image_dir=IMAGE_DIR):
     # Create model and run prediction on a pic of cows
-    model = init()
-    IMAGE_DIR = os.path.join(ROOT_DIR, 'data', 'images')
-    image = skimage.io.imread(os.path.join(IMAGE_DIR, image))
+    # image = get_demo_image(name)
+    image = skimage.io.imread(os.path.join(image_dir, name))
+
+    if model is None:
+        model = init()
+
     results = model.detect([image], verbose=1)
     r = results[0]
     print([class_names[i] for i in r['class_ids']])
